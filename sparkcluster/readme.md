@@ -21,3 +21,24 @@ If you are on Mac OS X then I recommend installing Ansible via Homebrew with a s
 You'll need to edit the `hadoop-core-site.xml.template` and `spark-core-site.xml.template` files to add your SoftLayer API key and Object Store user id. Save them as `hadoop-core-site.xml` and `spark-core-site.xml` respectively.
 
 The `softlayer-provision-and-create-ansible-hosts.sh` invokes the SoftLayer CLI to create the virtual machines. To add mode machines or change the configuration, this is where to do that. The Ansible playbook will deal with the additional nodes as long as the names are in the expected pattern (unless you're happy tinkering with the scripts and playbooks).
+
+### Execution ###
+Start with `softlayer-provision-and-create-ansible-hosts.sh`.
+
+     ./softlayer-provision-and-create-ansible-hosts.sh
+
+This script will provision the softlayer virtual machines and create a local file called `sl.hosts` which is used for the Ansible scripts. 
+
+Once the machines are provisioned execute:
+
+     ansible-playbook -i sl.hosts -u root playbook-install-hadoop-centos.yml
+
+This will prep, install and configure the hadoop and spark instances.
+A `hadoop` user is created and both hadoop and spark will run under that user. Now you can `ssh` to the `master` and start the hadoop and spark clusters, something like this:
+
+     my-imac$ ssh root@169.45.50.123
+     # su - hadoop
+     $ $HADOOP_HOME/sbin/start-master.sh
+     $ $SPARK_HOME/sbin/start-master.sh
+
+This is an example - you'll need to format and start the HDFS file system, or maybe you'd like yarn as well.
