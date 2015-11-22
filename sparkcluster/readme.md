@@ -1,6 +1,6 @@
 # Hadoop and Spark Cluster Creation #
 
-These scripts are based completely on Eric Whyne's (benchmark-tools)[https://github.com/ericwhyne/benchmark-tools] repository - thanks, Eric!
+These scripts are based completely on Eric Whyne's [benchmark-tools](https://github.com/ericwhyne/benchmark-tools) repository - thanks, Eric!
 
 The intent is to create a cluster from a chosen hadoop and spark binary installation. In the case of W251 the SoftLayer Swift Object store requires a patch and custom build of hadoop, which is used by the Ansible playbook. More information can be found on this [blog](https://www.ibm.com/developerworks/community/blogs/e90753c6-a6f1-4ae2-81d4-86eb33cf313c/entry/apache_spark_integrartion_with_softlayer_object_store?lang=en). I recommend that after installation you do the simple Swift object store test at the end of the post to make sure things are working.
 
