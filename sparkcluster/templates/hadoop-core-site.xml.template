@@ -1,0 +1,44 @@
+<?xml version="1.0"?>
+<configuration>
+  <property>
+    <name>fs.defaultFS</name>
+    <value>hdfs://master/</value>
+  </property>
+  <property>
+    <name>fs.swift.impl</name>
+    <value>org.apache.hadoop.fs.swift.snative.SwiftNativeFileSystem</value>
+  </property>
+  <property>
+    <name>fs.swift.service.sjc01.auth.url</name>
+    <value>https://sjc01.objectstorage.softlayer.net/auth/v1.0</value>
+  </property>
+  <property>
+    <name>fs.swift.service.sjc01.http.port</name>
+    <value>8080</value>
+  </property>
+  <property>
+    <name>fs.swift.service.sjc01.public</name>
+    <value>true</value>
+  </property>
+  <property>
+    <name>fs.swift.service.sjc01.location-aware</name>
+    <value>false</value>
+  </property>
+  <property>
+    <name>fs.swift.service.sjc01.endpoint.prefix</name>
+    <value>endpoints</value>
+  </property>
+  <property>
+    <name>fs.swift.service.sjc01.apikey</name>
+    <value>YOUR SOFTLAYER API KEY GOES HERE</value>
+  </property>
+  <property>
+    <name>fs.swift.service.sjc01.username</name>
+    <value>YOUR SOFTLAYER OBJECT STORE ID GOES HERE</value>
+  </property>
+  <property>
+    <name>fs.swift.service.sjc01.use.get.auth</name>
+    <value>true</value>
+  </property>
+
+</configuration>

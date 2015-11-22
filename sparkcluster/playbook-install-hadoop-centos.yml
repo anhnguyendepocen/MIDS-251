@@ -106,10 +106,11 @@
     - name: Copy hadoop files
       copy: src=templates/{{item}} dest=/usr/local/hadoop/etc/hadoop/{{item}} owner=hadoop group=hadoop mode=0644
       with_items:
-        - core-site.xml
         - hdfs-site.xml
         - mapred-site.xml
         - yarn-site.xml
+    - name: Copy hadoop core-site.xml
+      copy: src=templates/hadoop-core-site.xml dest=/usr/local/hadoop/etc/hadoop/core-site.xml owner=hadoop group=hadoop mode=0644
 
     - name: download spark
       get_url: url=https://s3-us-west-1.amazonaws.com/hadoopspark/spark-1.5.3-hadoop-2.6.2.tgz dest=/root/spark-1.5.3-hadoop-2.6.2.tgz
