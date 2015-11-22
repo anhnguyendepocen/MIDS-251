@@ -2,7 +2,7 @@
 
 These scripts are based completely on Eric Whyne's (benchmark-tools)[https://github.com/ericwhyne/benchmark-tools] repository - thanks, Eric!
 
-The intent is to create a cluster from a chosen hadoop and spark binary installation. In the case of W251 the SoftLayer Swift Object store requires a patch and custom build of hadoop, which is used by the Ansible playbook. More information can be found on this (blog)[https://www.ibm.com/developerworks/community/blogs/e90753c6-a6f1-4ae2-81d4-86eb33cf313c/entry/apache_spark_integrartion_with_softlayer_object_store?lang=en]. I recommend that after installation you do the simple Swift object store test at the end of the post to make sure things are working.
+The intent is to create a cluster from a chosen hadoop and spark binary installation. In the case of W251 the SoftLayer Swift Object store requires a patch and custom build of hadoop, which is used by the Ansible playbook. More information can be found on this [blog](https://www.ibm.com/developerworks/community/blogs/e90753c6-a6f1-4ae2-81d4-86eb33cf313c/entry/apache_spark_integrartion_with_softlayer_object_store?lang=en). I recommend that after installation you do the simple Swift object store test at the end of the post to make sure things are working.
 
 These scripts are a combination of bash shell scripts, SoftLayer command line, and Ansible playbooks. The intent is to create a set of machines designated as master or slave for use as a combination hadoop/spark cluster. The base configuration will create 1 master and 2 slaves, install and configure hadoop and install and configure Apache Spark.
 
@@ -15,7 +15,7 @@ Sorry Windows folks - these scripts as well as Ansible execute on a Linux-based 
 You must have the SoftLayer command line interface installed which relies on Python 2.7. It is assumed that the `slcli` commands function correctly and have the correct API KEY configuration for your SoftLayer account.
 
 #### Ansible ####
-If you are on Mac OS X then I recommend installing Ansible via Homebrew with a simple `brew install ansible`. However, other options are available. For more installation information consult the (instructions)[http://docs.ansible.com/ansible/intro_installation.html] on the Ansible site.
+If you are on Mac OS X then I recommend installing Ansible via Homebrew with a simple `brew install ansible`. However, other options are available. For more installation information consult the [instructions](http://docs.ansible.com/ansible/intro_installation.html) on the Ansible site.
 
 ### Setup ###
 You'll need to edit the `hadoop-core-site.xml.template` and `spark-core-site.xml.template` files to add your SoftLayer API key and Object Store user id. Save them as `hadoop-core-site.xml` and `spark-core-site.xml` respectively.
