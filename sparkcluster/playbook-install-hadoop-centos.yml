@@ -1,0 +1,159 @@
+- hosts: master
+  remote_user: root
+  tasks:
+    - name: self identify master
+      lineinfile: dest=/root/master.txt line='I am the master' create=yes
+
+- hosts: slaves
+  remote_user: root
+  tasks:
+    - name: self identify slaves
+      lineinfile: dest=/root/slave.txt line='I am a slave' create=yes
+
+- hosts: all
+  remote_user: root
+  tasks:
+
+    - name: update hosts file
+      lineinfile:
+        dest=/etc/hosts
+        regexp='{{ item }}.*$'
+        line="{{ item }} {{ hostvars[item].host_alias }}"
+        state=present
+      with_items: groups['all']
+
+    - name: creat ssh directories
+      file: path=/root/.ssh state=directory
+
+    - name: put master key on all servers as id_rsa
+      copy: src=ansible.key.temp dest=/root/.ssh/id_rsa mode=0600
+
+    - name: put master pub key on all servers as id_rsa.pub
+      copy: src=ansible.key.temp.pub dest=/root/.ssh/id_rsa.pub mode=0600
+
+    - name: trust the master keys
+      authorized_key: user=root key="{{ lookup('file', 'ansible.key.temp.pub') }}"
+
+    - name: install sbt repo
+      copy: src=templates/bintray-sbt-rpm.repo dest=/etc/yum.repos.d/ owner=root group=root mode=0644
+
+    - name: install rsync
+      yum: name=rsync state=latest
+
+    - name: install time
+      yum: name=time state=latest
+
+    - name: install net-tools
+      yum: name=net-tools state=latest
+
+    - name: install openjdk
+      yum: name=java-1.8.0-openjdk-devel state=latest
+
+    - name: copy set java script
+      copy: src=templates/set_java.sh dest=/root/set_java.sh mode=755
+
+    - name: execute set java script
+      command: sh /root/set_java.sh
+
+    - name: install sbt
+      yum: name=sbt state=latest
+
+    - name: create hadoop user
+      user: name=hadoop
+
+    - name: creat hadoop user ssh directory
+      file: path=/home/hadoop/.ssh owner=hadoop state=directory
+
+    - name: put master key on all servers as id_rsa
+      copy: src=ansible.key.temp dest=/home/hadoop/.ssh/id_rsa owner=hadoop group=hadoop mode=0600
+
+    - name: put master pub key on all servers as id_rsa.pub
+      copy: src=ansible.key.temp.pub dest=/home/hadoop/.ssh/id_rsa.pub owner=hadoop group=hadoop mode=0600
+
+    - name: trust the master keys as user hadoop
+      authorized_key: user=hadoop key="{{ lookup('file', 'ansible.key.temp.pub') }}"
+
+    - name: create data directory
+      file: path=/data state=directory mode=1777 owner=hadoop group=hadoop
+
+    - name: download hadoop
+      get_url: url=https://s3-us-west-1.amazonaws.com/hadoopspark/hadoop-2.6.2.tar.gz dest=/root/hadoop-2.6.2.tar.gz
+
+    - name: extract hadoop to /usr/local
+      unarchive: src=/root/hadoop-2.6.2.tar.gz copy=no dest=/usr/local/
+
+    - name: set hadoop symbolic link
+      file: state=link dest=/usr/local/hadoop src=/usr/local/hadoop-2.6.2
+
+    - name: set ownership of /usr/local/hadoop to hadoop user
+      file: path=/usr/local/hadoop-2.6.2 owner=hadoop recurse=yes
+
+    - name: set hadoop home
+      lineinfile: state=present dest=/home/hadoop/.bash_profile line='HADOOP_HOME=/usr/local/hadoop'
+    - name: set mapred home
+      lineinfile: state=present dest=/home/hadoop/.bash_profile line='HADOOP_MAPRED_HOME=$HADOOP_HOME'
+    - name: set hdfs home
+      lineinfile: state=present dest=/home/hadoop/.bash_profile line='HADOOP_HDFS_HOME=$HADOOP_HOME'
+    - name: set yarn home
+      lineinfile: state=present dest=/home/hadoop/.bash_profile line='YARN_HOME=$HADOOP_HOME'
+    - name: set java home
+      lineinfile: state=present dest=/home/hadoop/.bash_profile line='JAVA_HOME=/usr/lib/jvm/java'
+    - name: set java home in hadoop env
+      lineinfile: state=present create=yes dest=/usr/local/hadoop/etc/hadoop/hadoop-env.sh line='export JAVA_HOME=/usr/lib/jvm/java'
+    - name: append hadoop home to path
+      lineinfile: state=present dest=/home/hadoop/.bash_profile line='PATH=$PATH:$HADOOP_HOME/bin:$HADOOP_HOME/sbin'
+
+    - name: Copy hadoop files
+      copy: src=templates/{{item}} dest=/usr/local/hadoop/etc/hadoop/{{item}} owner=hadoop group=hadoop mode=0644
+      with_items:
+        - core-site.xml
+        - hdfs-site.xml
+        - mapred-site.xml
+        - yarn-site.xml
+
+    - name: download spark
+      get_url: url=https://s3-us-west-1.amazonaws.com/hadoopspark/spark-1.5.3-hadoop-2.6.2.tgz dest=/root/spark-1.5.3-hadoop-2.6.2.tgz
+
+    - name: extract spark to /usr/local
+      unarchive: src=/root/spark-1.5.3-hadoop-2.6.2.tgz copy=no dest=/usr/local/
+
+    - name: set spark symbolic link
+      file: state=link dest=/usr/local/spark src=/usr/local/spark-1.5.3-SNAPSHOT-bin-spark-1.5.2-hadoop-2.6.2
+    - name: set ownership of /usr/local/spark to hadoop user
+      file: path=/usr/local/spark-1.5.3-SNAPSHOT-bin-spark-1.5.2-hadoop-2.6.2 owner=hadoop recurse=yes
+    - name: set spark home
+      lineinfile: state=present dest=/home/hadoop/.bash_profile line='SPARK_HOME=/usr/local/spark'
+    - name: append spark home to path
+      lineinfile: state=present dest=/home/hadoop/.bash_profile line='PATH=$PATH:$SPARK_HOME/bin:$SPARK_HOME/sbin'
+    - name: Copy spark core-site.xml
+      copy: src=templates/spark-core-site.xml dest=/usr/local/spark/conf/core-site.xml owner=hadoop group=hadoop mode=0644
+
+
+- hosts: master
+  remote_user: root
+  tasks:
+    - name: write hadoop slaves file
+      lineinfile:
+        dest=/usr/local/hadoop/slaves
+        create=yes
+        regexp='{{ hostvars[item].host_alias }}'
+        line="{{ hostvars[item].host_alias }}"
+        state=present
+      with_items: groups['all']
+    - name: Copy init notes file
+      copy: src=templates/hadoop-init.txt dest=/home/hadoop/ owner=hadoop group=hadoop mode=0644
+    - name: Copy generate data script
+      copy: src=templates/generate-data.sh dest=/home/hadoop/ owner=hadoop group=hadoop mode=0744
+    - name: Copy terasort script
+      copy: src=templates/terasort.sh dest=/home/hadoop/ owner=hadoop group=hadoop mode=0744
+    - name: Copy teravalidate script
+      copy: src=templates/teravalidate.sh dest=/home/hadoop/ owner=hadoop group=hadoop mode=0744
+
+    - name: write spark slaves file
+      lineinfile:
+        dest=/usr/local/spark/conf/slaves
+        create=yes
+        regexp='{{ hostvars[item].host_alias }}'
+        line="{{ hostvars[item].host_alias }}"
+        state=present
+      with_items: groups['all']
