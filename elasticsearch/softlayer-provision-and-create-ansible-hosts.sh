@@ -1,33 +1,34 @@
 #!/bin/bash
-slcli -y vs create --datacenter=sjc03 --hostname=master --domain=w251.rlc --billing=hourly --key=rcordell --cpu=2 --memory=4096 --disk=100 --network=1000 --os=CENTOS_LATEST_64
+slcli -y vs create --datacenter=sjc03 --hostname=elasticm1 --domain=w251.rlc --billing=hourly --key=rcordell --cpu=2 --memory=4096 --disk=100 --network=1000 --os=CENTOS_LATEST_64
 sleep 5
-slcli -y vs create --datacenter=sjc03 --hostname=slave1 --domain=w251.rlc --billing=hourly --key=rcordell --cpu=2 --memory=4096 --disk=100 --network=1000 --os=CENTOS_LATEST_64
+slcli -y vs create --datacenter=sjc03 --hostname=elasticdata1 --domain=w251.rlc --billing=hourly --key=rcordell --cpu=2 --memory=4096 --disk=100 --network=1000 --os=CENTOS_LATEST_64
 sleep 5
-slcli -y vs create --datacenter=sjc03 --hostname=slave2 --domain=w251.rlc --billing=hourly --key=rcordell --cpu=2 --memory=4096 --disk=100 --network=1000 --os=CENTOS_LATEST_64
+slcli -y vs create --datacenter=sjc03 --hostname=elasticdata2 --domain=w251.rlc --billing=hourly --key=rcordell --cpu=2 --memory=4096 --disk=100 --network=1000 --os=CENTOS_LATEST_64
 
 # Wait for softlayer to issue ips to the servers we just created
 sleep 300
 
 # Grab the ip addresses
-masterip=`slcli vs list | grep master | awk '{print $3}'`
-slave1ip=`slcli vs list | grep slave1 | awk '{print $3}'`
-slave2ip=`slcli vs list | grep slave2 | awk '{print $3}'`
+masterip=`slcli vs list | grep elasticm1 | awk '{print $3}'`
+datanode1ip=`slcli vs list | grep elasticdata1 | awk '{print $3}'`
+datanode2ip=`slcli vs list | grep elasticdata2 | awk '{print $3}'`
 
-SLAVES=($slave1ip $slave2ip)
-ALLNODES=($masterip ${SLAVES[@]})
+DATANODES=($datanode1ip $datanode2ip)
+ALLNODES=($masterip ${DATANODES[@]})
 
 # cloud image specific configuration
 user=root
 
 # Generate ansible hosts file ##################################################
 hostsfile=sl.hosts
-echo "[master]" > $hostsfile
+
+echo "[master]" >> $hostsfile
 echo "$masterip host_alias=master" >> $hostsfile
 hostnum=1
-echo "[slaves]" >> $hostsfile
-for slaveip in "${SLAVES[@]}"
+echo "[datanodes]" >> $hostsfile
+for datanodeip in "${DATANODES[@]}"
 do
-  echo "$slaveip host_alias=slave$hostnum"  >> $hostsfile
+  echo "$datanodeip host_alias=datanode$hostnum"  >> $hostsfile
   let hostnum+=1
 done
 

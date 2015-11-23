@@ -2,14 +2,14 @@
 
 These scripts are based completely on Eric Whyne's [benchmark-tools](https://github.com/ericwhyne/benchmark-tools) repository - thanks, Eric!
 
-The intent is to create a cluster from a chosen hadoop and spark binary installation. In the case of W251 the SoftLayer Swift Object store requires a patch and custom build of hadoop, which is used by the Ansible playbook. More information can be found on this [blog](https://www.ibm.com/developerworks/community/blogs/e90753c6-a6f1-4ae2-81d4-86eb33cf313c/entry/apache_spark_integrartion_with_softlayer_object_store?lang=en). I recommend that after installation you do the simple Swift object store test at the end of the post to make sure things are working.
+The purpose of these scripts is to create a cluster from a chosen hadoop and spark binary installation. In the case of W251 the SoftLayer Swift Object store requires a patch and custom build of hadoop. More information can be found on this [blog](https://www.ibm.com/developerworks/community/blogs/e90753c6-a6f1-4ae2-81d4-86eb33cf313c/entry/apache_spark_integrartion_with_softlayer_object_store?lang=en). I recommend that after installation you do the simple Swift object store test at the end of the post to make sure things are working.
 
-These scripts are a combination of bash shell scripts, SoftLayer command line, and Ansible playbooks. The intent is to create a set of machines designated as master or slave for use as a combination hadoop/spark cluster. The base configuration will create 1 master and 2 slaves, install and configure hadoop and install and configure Apache Spark.
+These scripts are a combination of bash shell scripts, SoftLayer command line, and Ansible playbooks. The intent is to create a set of machines designated as master or slave for use as a combination hadoop/spark cluster. The base configuration will create 1 master and 2 slaves, install and configure hadoop and install and configure Apache Spark. Adding more slaves is easy; just add more SLCLI commands at the top of the provisioning script and stick to the `slaveX` naming convention and the scripts will take care of it.
 
 ## How to use these scripts ##
 ### Prerequisites ###
 #### Linux or Mac OS X ####
-Sorry Windows folks - these scripts as well as Ansible execute on a Linux-based OS. You'll need to use a virtual machine running Linux to use these.
+Sorry Windows folks - these scripts as well as Ansible execute on a Linux-based OS. You'll need to use a virtual machine running Linux to use them. Mac OS X works fine, of course.
 
 #### SoftLayer CLI ####
 You must have the SoftLayer command line interface installed which relies on Python 2.7. It is assumed that the `slcli` commands function correctly and have the correct API KEY configuration for your SoftLayer account.
@@ -41,4 +41,4 @@ A `hadoop` user is created and both hadoop and spark will run under that user. N
      $ $HADOOP_HOME/sbin/start-master.sh
      $ $SPARK_HOME/sbin/start-master.sh
 
-This is an example - you'll need to format and start the HDFS file system, or maybe you'd like yarn as well.
+This is an example - you'll need to format and start the HDFS file system, or maybe you'd like yarn as well. It's all there except for the native libraries, which I'll be adding soon.
