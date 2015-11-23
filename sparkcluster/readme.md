@@ -22,6 +22,8 @@ You'll need to edit the `hadoop-core-site.xml.template` and `spark-core-site.xml
 
 The `softlayer-provision-and-create-ansible-hosts.sh` invokes the SoftLayer CLI to create the virtual machines. To add mode machines or change the configuration, this is where to do that. The Ansible playbook will deal with the additional nodes as long as the names are in the expected pattern (unless you're happy tinkering with the scripts and playbooks).
 
+Also you will need to edit `softlayer-provision-and-create-ansible-hosts.sh` and change the key in the first three slcli vs create commands to the key linked to your softlayer account.
+
 ### Execution ###
 Start with `softlayer-provision-and-create-ansible-hosts.sh`.
 
