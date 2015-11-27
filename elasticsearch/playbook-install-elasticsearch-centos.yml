@@ -27,11 +27,13 @@
     - name: execute set java script
       command: sh /root/set_java.sh
 
-    - name: install net-tools
-      yum: name=net-tools state=latest
-
-    - name: install jq
-      yum: name=jq state=latest
+    - name: install packages
+      yum: pkg={{item}} state=latest
+      with_items:
+        - net-tools
+        - jq
+        - python-pip
+        - git
 
     - name: install elasticsearch
       yum: name=elasticsearch state=latest
@@ -97,7 +99,14 @@
       lineinfile: 'dest=/etc/elasticsearch/elasticsearch.yml
         state=present 
         insertafter=EOF
-        line="http.cors.allow-origin: \"http://www.gridshore.nl\""'      
+        line="http.cors.allow-origin: \"http://www.gridshore.nl\""' 
+
+    - name: install python modules
+      sudo: true
+      pip: name={{item}}
+      with_items:
+        - elasticsearch
+        - softlayer-object-storage    
 
 - hosts: master
   remote_user: root
