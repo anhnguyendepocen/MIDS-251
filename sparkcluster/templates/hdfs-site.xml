@@ -2,16 +2,16 @@
 <configuration>
   <property>
       <name>dfs.datanode.data.dir</name>
-      <value>file:///data/datanode</value>
+      <value>file:///usr/local/hadoop/data/datanode</value>
   </property>
 
   <property>
       <name>dfs.namenode.name.dir</name>
-      <value>file:///data/namenode</value>
+      <value>file:///usr/local/hadoop/data/namenode</value>
   </property>
 
   <property>
       <name>dfs.namenode.checkpoint.dir</name>
-      <value>file:///data/namesecondary</value>
+      <value>file:///usr/local/hadoop/data/namesecondary</value>
   </property>
 </configuration>
