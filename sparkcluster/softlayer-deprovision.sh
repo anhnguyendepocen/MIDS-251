@@ -1,18 +1,23 @@
 #!/bin/bash
 # First remove the ips from our known hosts in case we get these again in the future
+let num_slaves=8
+
 masterip=`slcli vs list | grep master | awk '{print $3}'`
-slave1ip=`slcli vs list | grep slave1 | awk '{print $3}'`
-slave2ip=`slcli vs list | grep slave2 | awk '{print $3}'`
+ssh-keygen -f "/Users/rcordell/.ssh/known_hosts" -R "${masterip}"
+
+for (( i=1;  i<=$num_slaves; i++ ))
+do
+	slaveip=`slcli vs list | grep "slave${i}" | awk '{print $3}'`
+	ssh-keygen -f "/Users/rcordell/.ssh/known_hosts" -R "${slaveip}"
+done
 
 # Then cancel the vms
 masterid=`slcli vs list | grep master | awk '{print $1}'`
-slave1id=`slcli vs list | grep slave1 | awk '{print $1}'`
-slave2id=`slcli vs list | grep slave2 | awk '{print $1}'`
+[[ ! -z "${masterid// }" ]] && slcli -y vs cancel "${masterid}"
 
-ssh-keygen -f "/Users/rcordell/.ssh/known_hosts" -R $masterid
-ssh-keygen -f "/Users/rcordell/.ssh/known_hosts" -R $slave1id
-ssh-keygen -f "/Users/rcordell/.ssh/known_hosts" -R $slave2id
+for (( i=1;  i<=$num_slaves; i++ ))
+do
+	slaveid=`slcli vs list | grep "slave${i}" | awk '{print $1}'`
+	[[ ! -z "${slaveid// }" ]] && slcli -y vs cancel "${slaveid}"
+done
 
-slcli -y vs cancel $masterid
-slcli -y vs cancel $slave1id
-slcli -y vs cancel $slave2id

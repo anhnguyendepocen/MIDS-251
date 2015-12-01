@@ -128,6 +128,8 @@
       lineinfile: state=present dest=/home/hadoop/.bash_profile line='PATH=$PATH:$SPARK_HOME/bin:$SPARK_HOME/sbin'
     - name: Copy spark core-site.xml
       copy: src=templates/spark-core-site.xml dest=/usr/local/spark/conf/core-site.xml owner=hadoop group=hadoop mode=0644
+    - name: Set HADOOP_CONF_DIR for Spark
+      lineinfile: state=present dest=/home/hadoop/.bash_profile line='HADOOP_CONF_DIR=/usr/local/hadoop/etc/hadoop'
 
 
 - hosts: master
@@ -135,20 +137,12 @@
   tasks:
     - name: write hadoop slaves file
       lineinfile:
-        dest=/usr/local/hadoop/slaves
+        dest=/usr/local/hadoop/etc/hadoop/slaves
         create=yes
         regexp='{{ hostvars[item].host_alias }}'
         line="{{ hostvars[item].host_alias }}"
         state=present
       with_items: groups['all']
-    - name: Copy init notes file
-      copy: src=templates/hadoop-init.txt dest=/home/hadoop/ owner=hadoop group=hadoop mode=0644
-    - name: Copy generate data script
-      copy: src=templates/generate-data.sh dest=/home/hadoop/ owner=hadoop group=hadoop mode=0744
-    - name: Copy terasort script
-      copy: src=templates/terasort.sh dest=/home/hadoop/ owner=hadoop group=hadoop mode=0744
-    - name: Copy teravalidate script
-      copy: src=templates/teravalidate.sh dest=/home/hadoop/ owner=hadoop group=hadoop mode=0744
 
     - name: write spark slaves file
       lineinfile:

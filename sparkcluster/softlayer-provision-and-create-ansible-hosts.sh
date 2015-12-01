@@ -1,25 +1,42 @@
 #!/bin/bash
-slcli -y vs create --datacenter=sjc03 --hostname=master --domain=w251.rlc --billing=hourly --key=rcordell --cpu=2 --memory=4096 --disk=100 --network=1000 --os=CENTOS_LATEST_64
+
+# DO NOT SET >9 slaves
+let num_slaves=8
+
+# create the master
+slcli -y vs create --datacenter=sjc03 --hostname=master --domain=w251.rlc --billing=hourly --key=rcordell --cpu=4 --memory=8192 --disk=100 --network=1000 --os=CENTOS_LATEST_64
 sleep 5
-slcli -y vs create --datacenter=sjc03 --hostname=slave1 --domain=w251.rlc --billing=hourly --key=rcordell --cpu=2 --memory=4096 --disk=100 --network=1000 --os=CENTOS_LATEST_64
-sleep 5
-slcli -y vs create --datacenter=sjc03 --hostname=slave2 --domain=w251.rlc --billing=hourly --key=rcordell --cpu=2 --memory=4096 --disk=100 --network=1000 --os=CENTOS_LATEST_64
+
+# create the slaves
+for (( i=1;  i<=$num_slaves; i++ ))
+do
+	slcli -y vs create --datacenter=sjc03 --hostname=slave${i} --domain=w251.rlc --billing=hourly --key=rcordell --cpu=4 --memory=8192 --disk=100 --network=1000 --os=CENTOS_LATEST_64
+	sleep 30
+done
+
 
 # Wait for softlayer to issue ips to the servers we just created
 sleep 300
 
 # Grab the ip addresses
 masterip=`slcli vs list | grep master | awk '{print $3}'`
-slave1ip=`slcli vs list | grep slave1 | awk '{print $3}'`
-slave2ip=`slcli vs list | grep slave2 | awk '{print $3}'`
 
-SLAVES=($slave1ip $slave2ip)
+SLAVES=()
+for (( i=1;  i<=$num_slaves; i++ ))
+do
+	slaveip=`slcli vs list | grep "slave${i}" | awk '{print $3}'`
+	SLAVES=("${SLAVES[@]}" $slaveip)
+done
+
+# SLAVES=($slave1ip $slave2ip $slave3ip $slave4ip $slave5ip $slave6ip $slave7ip $slave8ip $slave9ip)
 ALLNODES=($masterip ${SLAVES[@]})
 
+echo $ALLNODES
 # cloud image specific configuration
 user=root
 
 # Generate ansible hosts file ##################################################
+# NOTE: this works as long as there are 9 slaves or less
 hostsfile=sl.hosts
 echo "[master]" > $hostsfile
 echo "$masterip host_alias=master" >> $hostsfile
