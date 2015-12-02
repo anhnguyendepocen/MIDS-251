@@ -13,8 +13,8 @@ if __name__ == "__main__":
     sc = SparkContext(conf=conf)
 
     # execute the work we want to do with Spark
-    comments = sc.textFile(REDDIT_FILES).flatMap(lambda line: json.loads(line))
+    comments = sc.textFile(REDDIT_FILES).map(lambda line: json.loads(line))
     words = comments.flatMap(lambda comment: comment['body'].split(" "))
     counts = words.map(lambda word: (word, 1)).reduceByKey(lambda a,b: a + b)
-    counts.saveAsTextFile("hdfs://master/ronc/word_counts")
+    counts.saveAsTextFile("hdfs://master/usr/hadoop/word_counts")
     sc.stop()

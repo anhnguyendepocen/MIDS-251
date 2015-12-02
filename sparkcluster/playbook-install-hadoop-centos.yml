@@ -73,9 +73,6 @@
     - name: trust the master keys as user hadoop
       authorized_key: user=hadoop key="{{ lookup('file', 'ansible.key.temp.pub') }}"
 
-    - name: create data directory
-      file: path=/data state=directory mode=1777 owner=hadoop group=hadoop
-
     - name: download hadoop
       get_url: url=https://s3-us-west-1.amazonaws.com/hadoopspark/hadoop-2.6.2.tar.gz dest=/root/hadoop-2.6.2.tar.gz
 
@@ -102,6 +99,9 @@
       lineinfile: state=present create=yes dest=/usr/local/hadoop/etc/hadoop/hadoop-env.sh line='export JAVA_HOME=/usr/lib/jvm/java'
     - name: append hadoop home to path
       lineinfile: state=present dest=/home/hadoop/.bash_profile line='PATH=$PATH:$HADOOP_HOME/bin:$HADOOP_HOME/sbin'
+
+    - name: create data directory
+      file: path=/usr/local/hadoop/data state=directory mode=1777 owner=hadoop group=hadoop
 
     - name: Copy hadoop files
       copy: src=templates/{{item}} dest=/usr/local/hadoop/etc/hadoop/{{item}} owner=hadoop group=hadoop mode=0644
