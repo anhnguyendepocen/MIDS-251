@@ -1,0 +1,29 @@
+- hosts: all
+  remote_user: root
+
+  tasks:
+    - name: install epel
+      action: yum pkg=epel-release state=latest
+    - name: install packages
+
+      action: yum pkg={{item}} state=latest
+      with_items:
+        - python-pip
+        - java-1.8.0-openjdk-devel
+
+    - name: install various libraries with pip
+      action: pip name={{item}} state=present
+      with_items:
+        - pykafka
+
+    # install kafka
+    - name: download kafka
+      get_url: url=http://apache.arvixe.com/kafka/0.9.0.0/kafka_2.11-0.9.0.0.tgz dest=/tmp/
+    - name: unpack kafka
+      unarchive: src=/tmp/kafka_2.11-0.9.0.0.tgz dest=/usr/local/ copy=no
+    - name: set kafka symbolic link
+      file: state=link dest=/usr/local/kafka src=/usr/local/kafka_2.11-0.9.0.0
+    - name: set kafka home
+      lineinfile: state=present dest=/etc/profile line='export KAFKA_HOME=/usr/local/kafka'
+    - name: copy example start script
+      copy: src=templates/kafkaexamples.txt dest=/root/ owner=root group=root mode=0644
