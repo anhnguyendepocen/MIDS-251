@@ -36,8 +36,12 @@ object SimpleApp {
                     1))
         .reduceByKey(_ + _)
 
-    val word_counts = df.select("body").flatMap(row => row.toString.split(" "))
-        .map(word => (word.trim, 1))
+    val regex = "[^a-zA-Z0-9]".r
+
+    val word_counts = df.select("body").flatMap(row => row.toString.split("\\s+"))
+        .map(word => regex.replaceAllIn(word.trim.toLowerCase, ""))
+        .filter(word => !word.isEmpty)
+        .map(word => (word, 1))
         .reduceByKey(_ + _)
 
     authorperhour.saveAsTextFile("hdfs://master/user/" + year + "authorperhour_counts")
