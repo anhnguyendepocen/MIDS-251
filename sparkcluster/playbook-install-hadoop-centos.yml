@@ -17,7 +17,6 @@
     - name: update hosts file
       lineinfile:
         dest=/etc/hosts
-        regexp='{{ item }}.*$'
         line="{{ item }} {{ hostvars[item].host_alias }}"
         state=present
       with_items: groups['all']
